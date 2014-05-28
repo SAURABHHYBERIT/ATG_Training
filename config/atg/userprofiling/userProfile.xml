@@ -1,0 +1,61 @@
+<!-- This file provides a starting point for extending the 
+     profile repository.
+
+     The comments below coincide with the instructions in the
+     lab.
+ -->
+ 
+ <!DOCTYPE gsa-template PUBLIC "-//Art Technology Group, Inc.//DTD Dynamo Security//EN" 
+"http://www.atg.com/dtds/gsa/gsa_1.0.dtd">
+ 
+     
+<gsa-template>
+ 
+ <item-descriptor name="user" >
+
+    <table name="dynamusic_user" type="auxiliary"
+         id-column-name="user_id">
+    	<property name="info" data-type="string"
+              column-name="info" category="dynamusic" />
+        <property name="shareProfile" data-type="boolean" 
+              column-name="share_profile" category="dynamusic" />
+    </table>
+
+    <table name="dynamusic_prefgenres" type="multi"
+           id-column-name="id">
+        <property name="prefGenres"                           
+           category="dynamusic" data-type="set"
+              component-data-type="string"
+              column-name="genre"/>
+    </table>
+
+    <table name="dynamusic_viewedartists" type="multi"
+           id-column-name="user_id">
+        <property name="viewedArtists"                           
+           category="dynamusic" data-type="set"
+           component-item-type="artist"
+           column-name="artist_id"
+           repository="/dynamusic/SongsRepository"/>
+    </table>
+    
+    <table name="dynamusic_user_interest" type="multi" id-column-name="user_id" multi-column-name="interest_name" >
+    	<property name="interests"
+    		category="dynamusic"
+    		data-type="map"
+    		component-data-type="int"
+    		column-name="rating" />
+    </table>
+    
+    <property name="interestsAvgRating" data-type="int" property-type="dynamusic.AverageInterestRating" default="0" category="dynamusic" writable="false" cache-mode="disabled" />
+    
+    <property name="ageInYears" data-type="int" property-type="dynamusic.FindAge" default="0" category="dynamusic" writable="false">
+    	<attribute name="ageFormat" value="years" data-type="string" />
+    </property>
+    
+    <property name="ageInDays" data-type="int" property-type="dynamusic.FindAge" default="0" category="dynamusic" writable="false">
+    	<attribute name="ageFormat" value="days" data-type="string" />
+    </property>
+
+ </item-descriptor>
+
+</gsa-template>
