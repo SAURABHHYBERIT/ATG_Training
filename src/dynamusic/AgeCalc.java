@@ -63,5 +63,4 @@ public class AgeCalc {
   	long ageAsSeconds = ageAsTime/1000;
   	return ageAsSeconds;
    }
-
 }

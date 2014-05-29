@@ -5,77 +5,81 @@ import java.util.*;
 
 import javax.servlet.ServletException;
 
+import atg.repository.RepositoryItem;
 import atg.servlet.DynamoHttpServletRequest;
 import atg.servlet.DynamoHttpServletResponse;
 import atg.servlet.DynamoServlet;
 
 public class ShowInterests extends DynamoServlet {
 	
-	private Map<String, Integer> interests;
-	private String showParameter;
 	public static final String SHOW_ALL = "all";
 	public static final String SHOW_EVEN = "even";
 	public static final String SHOW_ODD = "odd";
-	
-	public Map<String, Integer> getInterests() {
-		return interests;
-	}
-	public void setInterests(Map<String, Integer> interests) {
-		this.interests = interests;
-	}
-	public String getShowParameter() {
-		return showParameter;
-	}
-	public void setShowParameter(String show) {
-		this.showParameter = show;
-	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	public void service(DynamoHttpServletRequest req,
 			DynamoHttpServletResponse res) throws ServletException, IOException {
 		
-		setInterests((Map<String, Integer>)req.getObjectParameter("interests"));
-		setShowParameter(req.getParameter("showParameter"));
+		List<RepositoryItem> interests = new ArrayList<RepositoryItem>((Set<RepositoryItem>) req.getObjectParameter("interests"));
+		String showParameter = req.getParameter("showParameter");
 		
-		if(getShowParameter() == null){
-			setShowParameter(SHOW_ALL);
+		if(showParameter == null){
+			showParameter = SHOW_ALL;
 		}
 		
-		if(getInterests() == null || getInterests().isEmpty()){
+		if(interests == null || interests.isEmpty()){
 			req.setParameter("message", "No interests found");
 			req.serviceParameter("empty", req, res);
 		} else {
 			
-			SortedSet<String> keys = new TreeSet<String>(getInterests().keySet());
-			
-			for (String key : keys) {
+			List<RepositoryItem> result = filterInterests(interests, showParameter);
+			for (RepositoryItem repositoryItem : result) {
 				
-				int rating = getInterests().get(key);
+				String name = (String) repositoryItem.getPropertyValue("name");
+				String rating = (String) repositoryItem.getPropertyValue("rating");
 				
-				if(getShowParameter().equalsIgnoreCase(SHOW_EVEN)){
-					
-					if((rating % 2) == 0){
-						req.setParameter("interestName", key);
-						req.setParameter("interestRating", rating);
-						req.serviceParameter("output", req, res);
-					}
-					
-				} else if(getShowParameter().equalsIgnoreCase(SHOW_ODD)){
-					
-					if((rating % 2) != 0){
-						req.setParameter("interestName", key);
-						req.setParameter("interestRating", rating);
-						req.serviceParameter("output", req, res);
-					}
-					
-				} else {
-					req.setParameter("interestName", key);
-					req.setParameter("interestRating", rating);
-					req.serviceParameter("output", req, res);
-				}
-			}			
+				req.setParameter("interest", repositoryItem);
+				req.setParameter("interestId", repositoryItem.getRepositoryId());
+				req.setParameter("interestName", name);
+				req.setParameter("interestRating", rating);
+				req.serviceParameter("output", req, res);
+			}	
 		}		
+	}
+	
+	public List<RepositoryItem> filterInterests(List<RepositoryItem> interests, String showParameter){
+		List<RepositoryItem> result = new ArrayList<RepositoryItem>();
+		for (RepositoryItem repositoryItem : interests) {
+			
+			String ratingValue = (String) repositoryItem.getPropertyValue("rating");
+			int rating = Integer.parseInt(ratingValue);
+			
+			if(showParameter.equalsIgnoreCase(SHOW_EVEN)){
+				if((rating % 2) == 0){
+					result.add(repositoryItem);
+				}
+				
+			} else if(showParameter.equalsIgnoreCase(SHOW_ODD)){
+				if((rating % 2) != 0){
+					result.add(repositoryItem);
+				}
+				
+			} else {
+				result.add(repositoryItem);
+			}
+		}
+		
+		Collections.sort(result, new Comparator<RepositoryItem>(){
+			@Override
+			public int compare(RepositoryItem paramT1, RepositoryItem paramT2) {
+				String name1 = (String) paramT1.getPropertyValue("name");
+				String name2 = (String) paramT2.getPropertyValue("name");
+				return name1.compareTo(name2);
+			}
+		});
+		
+		return result;
 	}
 
 }

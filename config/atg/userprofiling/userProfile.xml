@@ -38,15 +38,15 @@
            repository="/dynamusic/SongsRepository"/>
     </table>
     
-    <table name="dynamusic_user_interest" type="multi" id-column-name="user_id" multi-column-name="interest_name" >
+    <table name="dynamusic_user_interest" type="multi" id-column-name="user_id">
     	<property name="interests"
     		category="dynamusic"
-    		data-type="map"
-    		component-data-type="int"
-    		column-name="rating" />
+    		data-type="set"
+    		component-item-type="interest"
+    		column-name="interest_id" />
     </table>
     
-    <property name="interestsAvgRating" data-type="int" property-type="dynamusic.AverageInterestRating" default="0" category="dynamusic" writable="false" cache-mode="disabled" />
+    <property name="interestsAvgRating" data-type="int" property-type="dynamusic.propertyDescriptor.AverageInterestRating" default="0" category="dynamusic" writable="false" cache-mode="disabled" />
     
     <property name="ageInYears" data-type="int" property-type="dynamusic.FindAge" default="0" category="dynamusic" writable="false">
     	<attribute name="ageFormat" value="years" data-type="string" />
@@ -56,6 +56,26 @@
     	<attribute name="ageFormat" value="days" data-type="string" />
     </property>
 
+ </item-descriptor>
+ 
+ <item-descriptor name="interest">
+ 	<table name="dynamusic_interest" id-column-name="id" type="primary">
+ 		<property name="id" data-type="string"/>
+ 		<property name="name" column-name="name" data-type="string"/>
+ 		<property name="rating" column-name="rating" data-type="enumerated">
+ 			<attribute name="useCodeForValue" value="false" />
+ 			<option value="1" />
+ 			<option value="2" />
+ 			<option value="3" />
+ 			<option value="4" />
+ 			<option value="5" />
+ 			<option value="6" />
+ 			<option value="7" />
+ 			<option value="8" />
+ 			<option value="9" />
+ 			<option value="10" /> 
+ 		</property>
+ 	</table>
  </item-descriptor>
 
 </gsa-template>

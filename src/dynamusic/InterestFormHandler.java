@@ -1,11 +1,10 @@
 package dynamusic;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 
-import atg.droplet.DropletException;
 import atg.repository.MutableRepository;
 import atg.repository.MutableRepositoryItem;
 import atg.repository.RepositoryException;
@@ -15,98 +14,47 @@ import atg.servlet.DynamoHttpServletResponse;
 
 public class InterestFormHandler extends RepositoryFormHandler {
 	
-	@Override
-	public boolean handleUpdate(DynamoHttpServletRequest req,
-			DynamoHttpServletResponse res) throws ServletException,
-			IOException {
-		String key = req.getParameter("key");
-		String newValue = req.getParameter("newValue");
-		if(key == null || key.equals("") || newValue == null || newValue.equals("")){
-			addFormException(new DropletException("Fields musn't be empty"));
-			if (getUpdateErrorURL() != null) {
-				res.sendLocalRedirect(getUpdateErrorURL(), req);
-				return false;
-			}
-			return true;
-		}
-		
-		if(key.length() > 50){
-			addFormException(new DropletException("Max lenght 50 characters"));
-			if (getUpdateErrorURL() != null) {
-				res.sendLocalRedirect(getUpdateErrorURL(), req);
-				return false;
-			}
-			return true;
-		}
-		
-		String userId = req.getParameter("repId");
-		
-		MutableRepository mu = (MutableRepository) getRepository();
-		
-		try {
-			MutableRepositoryItem mri = mu.getItemForUpdate(userId, "user");
-			@SuppressWarnings("unchecked")
-			Map<String, Integer> interests = (Map<String, Integer>) mri.getPropertyValue("interests");
-			int value = 0;
-			try {
-				value = Integer.parseInt(newValue);
-			} catch (NumberFormatException e){
-				addFormException(new DropletException("Wrong number format, use numbers"));
-				if (getUpdateErrorURL() != null) {
-					res.sendLocalRedirect(getUpdateErrorURL(), req);
-					return false;
-				}
-				return true;
-			}
-			if(value > 10 || value < 1){
-				addFormException(new DropletException("Please use numbers 1 to 10"));
-				if (getUpdateErrorURL() != null) {
-					res.sendLocalRedirect(getUpdateErrorURL(), req);
-					return false;
-				}
-				return true;
-			}
-			interests.put(key, value);
-			mri.setPropertyValue("interests", interests);
-		} catch (RepositoryException e) {
-			logDebug("repository exception");
-			return true;
-		}
+	private String userId;
+	
+	public String getUserId() {
+		return userId;
+	}
 
-		return super.handleUpdate(req, res);
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	@Override
+	protected void postCreateItem(DynamoHttpServletRequest pRequest,
+			DynamoHttpServletResponse pResponse) throws ServletException,
+			IOException {
+		
+		MutableRepository mr = (MutableRepository) getRepository();
+		try {
+			MutableRepositoryItem mri = mr.getItemForUpdate(getUserId(), "user");
+			@SuppressWarnings("unchecked")
+			Set<Object> userInterests = (Set<Object>) mri.getPropertyValue("interests");
+			userInterests.add(getRepositoryItem());
+			mri.setPropertyValue("interests", userInterests);
+		} catch (RepositoryException e) {
+			logError("Unable to update interest");
+		}
 	}
 	
 	@Override
-	public boolean handleDelete(DynamoHttpServletRequest req,
-			DynamoHttpServletResponse res) throws ServletException,
+	protected void preDeleteItem(DynamoHttpServletRequest pRequest,
+			DynamoHttpServletResponse pResponse) throws ServletException,
 			IOException {
-		String key = req.getParameter("key");
-		if(key == null || key.equals("")){
-			addFormException(new DropletException("Fields musn't be empty"));
-			if (getDeleteErrorURL() != null) {
-				res.sendLocalRedirect(getDeleteErrorURL(), req);
-				return false;
-			}
-			return false;
-		}
-		
-		String userId = req.getParameter("repId");
-		
-		MutableRepository mu = (MutableRepository) getRepository();
-		
+		MutableRepository mr = (MutableRepository) getRepository();
 		try {
-			MutableRepositoryItem mri = mu.getItemForUpdate(userId, "user");
+			MutableRepositoryItem mri = mr.getItemForUpdate(getUserId(), "user");
 			@SuppressWarnings("unchecked")
-			Map<String, Integer> interests = (Map<String, Integer>) mri.getPropertyValue("interests");
-			interests.remove(key);
-			mri.setPropertyValue("interests", interests);
+			Set<Object> userInterests = (Set<Object>) mri.getPropertyValue("interests");
+			userInterests.remove(getRepository().getItem(getRepositoryId(), "interest"));
+			mri.setPropertyValue("interests", userInterests);
 		} catch (RepositoryException e) {
-			logDebug("repository exception");
-			return true;
+			logError("Unable to delete interest from user");
 		}
-		
-		res.sendRedirect(getDeleteSuccessURL());
-		return true;
 	}
 	
 }
