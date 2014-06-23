@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gsa-template PUBLIC "-//Art Technology Group, Inc.//DTD Dynamo Security//EN" 
+"http://www.atg.com/dtds/gsa/gsa_1.0.dtd">
+
+<gsa-template>
+	<item-descriptor name="sku" >
+		<table name="mys_sku" id-column-name="sku_id" type="auxiliary" >
+			<property name="isCreditEligible" column-name="eligible" data-type="boolean" display-name-resource="eligible" category-resource="categoryMyStore" default="false">
+				<attribute name="resourceBundle" value="com.mystore.catalog.CustomCatalogResources" data-type="string" />
+			</property>
+		</table>
+	</item-descriptor>
+
+</gsa-template>
