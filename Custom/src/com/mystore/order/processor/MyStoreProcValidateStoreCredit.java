@@ -20,9 +20,6 @@ public class MyStoreProcValidateStoreCredit extends ProcValidateStoreCredit {
 		if(pg.getAmount() > 0.0){
 			if(!(order.isCreditEligible()) || !(order.isUseCredit())){
 				logDebug("validatind store credit");
-				logDebug(pg.getPaymentGroupClassType() + " PGclass");
-				logDebug(pg.getPaymentMethod() + " PM");
-				logDebug(pg.getAmount() + " PGAmount");
 				pResult.addError("storeCreditPaymentGroupNotEligibleOrderError", "This order is not eligible for credit payment");
 				return 1;
 			}

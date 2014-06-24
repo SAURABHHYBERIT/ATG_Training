@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gsa-template PUBLIC "-//Art Technology Group, Inc.//DTD Dynamo Security//EN" 
+"http://www.atg.com/dtds/gsa/gsa_1.0.dtd">
+
+<gsa-template>
+
+	<item-descriptor name="user" >
+		<table name="mys_user" type="auxiliary" id-column-name="user_id">
+			<property name="mystore" 
+				column-name="store_id"
+				item-type="store" 
+				repository="/atg/store/stores/StoreRepository" 
+			/>			
+		</table>
+		<table name="mys_user_points" id-column-name="user_id" type="auxiliary">
+			<property name="points" column-name="points_id"
+				item-type="points" display-name="Loyalty Points"
+				category="MyStoreExt" cascade="insert,update,delete" />
+		</table>
+
+		<property name="spentCredit" 
+			data-type="double" property-type="com.mystore.credit.UserSpentCredit" 
+			default="0" category="MyStoreExt" writable="false" cache-mode="disabled" >
+			
+			<attribute name="claimableManager" bean="/atg/commerce/claimable/ClaimableManager" />
+			
+		</property>
+		
+	</item-descriptor>
+	
+	<item-descriptor name="points">
+		<table name="mys_points" type="primary" id-column-name="points_id">
+			<property name="availableBalance" column-name="available" data-type="int" />
+			<property name="reservedBalance" column-name="reserved" data-type="int" />
+		</table>
+	</item-descriptor>
+	
+</gsa-template>
